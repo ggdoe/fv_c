@@ -1,11 +1,13 @@
 #!/bin/sh
 
-SRC=./src/*.c
+SRC="./src/*.c ./src/sim/*.c"
 out_name="a.out"
 
-LIB="-lSDL2"
+CFLAGS="-Wall"
+LFLAGS="-flto"
+LIB="-lm -lSDL2 -lx264"
 
 set -xe
-gcc  $SRC -o $out_name $LIB
+gcc  $CFLAGS $LFLAGS -o $out_name $SRC $LIB
 
 
