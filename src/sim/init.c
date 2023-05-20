@@ -11,7 +11,7 @@ void fill_boundaries_step_reflect(real *q, double sign); // delete
 
 void init_sim(u32 Nx)
 {
-    u32 Ng = 3;
+    u32 Ng = 2;
 
     grid.Ng = Ng;
     grid.Nx = Nx;
@@ -21,7 +21,7 @@ void init_sim(u32 Nx)
     real xmax = 1.; grid.xmax = xmax;
     real dx = (xmax - xmin) / Nx;
     grid.dx = dx;
-    grid.CFL = 0.4;
+    grid.CFL = 0.3;
     grid.gamma = 1.4;
 
     grid.x = malloc(grid.Nx_tot * sizeof(real));

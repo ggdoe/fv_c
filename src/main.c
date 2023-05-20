@@ -4,8 +4,8 @@
 #include "sim/sim.h"
 #include "const.h"
 
-// #define SDL_IMPL
-#define x264_IMPL
+#define SDL_IMPL
+// #define x264_IMPL
 
 extern struct pstate pstate;
 extern struct grid grid;
@@ -50,14 +50,18 @@ int main(int argc, char ** argv)
 
     while (!quit)
     {
-        if(grid.t >= 0.2)
-            #ifdef SDL_IMPL
-                init_problem(&pstate);
-            #else
-                break;
+            #if 0
+            // if(grid.t >= 1.0)
+            // #ifdef SDL_IMPL
+            //     init_problem(&pstate);
+            // #else
+            //     break;
+            // #endif
             #endif
 
-        for (size_t i = 0; i < 10; i++)
+        real dt = 1/60.;
+        real t = grid.t;
+        while(grid.t < t + dt)
             step(1.0);
         fill_pixels(pixels);
 
@@ -65,7 +69,7 @@ int main(int argc, char ** argv)
         //     pixels[i] = rand();
 
         #ifdef SDL_IMPL
-            update_sdl();
+            update_sdl(pixels);
         #else
             if(update_x264(pixels))
                 break;
@@ -100,7 +104,7 @@ void fill_pixels(uint32_t *pixels)
     min = 0.0; max = 1.1;
 
     memset(pixels, 0xFF, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(uint32_t));
-    size_t y = SCREEN_HEIGHT - 1;
+    size_t y = (size_t)((1-(q[0]-min)/(max-min)) * SCREEN_HEIGHT);
 
     for (size_t i = 0; i < SCREEN_WIDTH; i++)
     {

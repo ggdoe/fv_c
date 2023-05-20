@@ -52,7 +52,9 @@ struct fcell get_flux_star_shift(struct ccell *U, struct pcell *Q, real S, real 
     // Ustar
     struct fcell shift = {.r  = factor * 1.0,
                           .ru = factor * Sstar,
-                          .e  = factor * (U->e / U->r + (Sstar - Q->u) * (Sstar + Q->p / (Q->r * (S - Q->u))))};
+                          .e  = factor * (U->e / U->r 
+                                          + (Sstar - Q->u) * (Sstar + Q->p / (Q->r * (S - Q->u))))
+                         };
     
     // shift flux
     shift.r  = S * (shift.r  - U->r);
@@ -78,8 +80,6 @@ struct fcell solve_fluxes(struct pcell *pl, struct pcell *pr)
         Sstar /= (Ul.r * (S.L - pl->u) - Ur.r * (S.R - pr->u));
     // TODO : attention division par zéro
 
-    struct fcell shift_Fl = get_flux_star_shift(&Ul, pl, S.L, Sstar);
-    struct fcell shift_Fr = get_flux_star_shift(&Ur, pr, S.R, Sstar);
 
     struct fcell flux_out;
 
@@ -89,11 +89,13 @@ struct fcell solve_fluxes(struct pcell *pl, struct pcell *pr)
         flux_out.e  = Fl.e;
     }
     else if(S.L <= 0.0 && 0.0 <= Sstar){
+        struct fcell shift_Fl = get_flux_star_shift(&Ul, pl, S.L, Sstar);
         flux_out.r  = Fl.r  + shift_Fl.r;
         flux_out.ru = Fl.ru + shift_Fl.ru;
         flux_out.e  = Fl.e  + shift_Fl.e;
     }
     else if(Sstar <= 0.0 && 0.0 <= S.R){
+        struct fcell shift_Fr = get_flux_star_shift(&Ur, pr, S.R, Sstar);
         flux_out.r  = Fr.r  + shift_Fr.r;
         flux_out.ru = Fr.ru + shift_Fr.ru;
         flux_out.e  = Fr.e  + shift_Fr.e;

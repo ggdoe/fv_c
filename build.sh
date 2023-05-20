@@ -8,6 +8,6 @@ LFLAGS="-flto"
 LIB="-lm -lSDL2 -lx264"
 
 set -xe
-gcc  $CFLAGS $LFLAGS -o $out_name $SRC $LIB
+gcc $CFLAGS $LFLAGS -o $out_name $SRC $LIB
 
 

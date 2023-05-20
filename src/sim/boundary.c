@@ -1,5 +1,9 @@
 #include "sim.h"
 
+#ifdef _WIN32
+#define __attribute_maybe_unused__
+#endif
+
 extern struct grid grid;
 extern struct cstate cstate;
 

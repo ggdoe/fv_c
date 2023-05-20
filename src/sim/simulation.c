@@ -10,7 +10,7 @@ struct pstate x_slope;
 
 real minmod(real a, real b)
 {
-    return (a * b < 0.0) ? 0.0 : (a < b) ? a : b;
+    return (a * b < 0.0) ? 0.0 : (fabs(a) < fabs(b)) ? a : b;
 }
 
 void compute_slopes()
@@ -24,14 +24,13 @@ void compute_slopes()
         x_slope.p[i] = minmod(pstate.p[i  ] - pstate.p[i-1], 
                               pstate.p[i+1] - pstate.p[i  ]);
     }
-    x_slope.r[0] = x_slope.r[1]; x_slope.r[grid.Nx_tot - 1] = x_slope.r[grid.Nx_tot - 2];
-    x_slope.u[0] = x_slope.u[1]; x_slope.u[grid.Nx_tot - 1] = x_slope.u[grid.Nx_tot - 2];
-    x_slope.p[0] = x_slope.p[1]; x_slope.p[grid.Nx_tot - 1] = x_slope.p[grid.Nx_tot - 2];
 
-
-    // print_mat(x_slope.r, 1, grid.Nx_tot);
-    // static cpt = 0;
-    // printf("%u\n", ++cpt);
+    // x_slope.r[0]               = x_slope.r[1]; 
+    // x_slope.u[0]               = x_slope.u[1]; 
+    // x_slope.p[0]               = x_slope.p[1]; 
+    // x_slope.r[grid.Nx_tot - 1] = x_slope.r[grid.Nx_tot - 2];
+    // x_slope.u[grid.Nx_tot - 1] = x_slope.u[grid.Nx_tot - 2];
+    // x_slope.p[grid.Nx_tot - 1] = x_slope.p[grid.Nx_tot - 2];
 }
 
 void reconstruct_interface(struct pcell *p, size_t i, real sign)
@@ -39,10 +38,6 @@ void reconstruct_interface(struct pcell *p, size_t i, real sign)
         p->r = p->r + sign * 0.5 * x_slope.r[i];
         p->u = p->u + sign * 0.5 * x_slope.u[i];
         p->p = p->p + sign * 0.5 * x_slope.p[i];
-        // if(p->r < 0)
-        //     p->r = 1e-5;
-        // if(p->p < 0)
-        //     p->r = 1e-5;
 }
 
 void update_cells()
@@ -51,13 +46,10 @@ void update_cells()
     {
         struct pcell pl = get_cell(&pstate, i);
         struct pcell pr = get_cell(&pstate, i+1);
-        // reconstruct_interface(&pl, i, +1.0);
-        // reconstruct_interface(&pr, i+1, -1.0);
-        // printf("%lf %lf \n", pl.r, pr.r);
-        // printf("%lf %lf \n", pl.p, pr.p);
+        reconstruct_interface(&pl, i,   +1.0);
+        reconstruct_interface(&pr, i+1, -1.0);
 
-        // TODO : reconstruct q
-
+        // printf("%lu\n",i);
         struct fcell F  = solve_fluxes(&pl, &pr);
         
         fluxes.r[i]  = F.r;
@@ -77,25 +69,15 @@ void update_cells()
 void run(real tmax)
 {
     real *t = &grid.t;
-    size_t itt = 0;
-
-    // struct pstate p0;
-    // p0.r = malloc(grid.Nx_tot * sizeof(real));
-    // p0.u = malloc(grid.Nx_tot * sizeof(real));
-    // p0.p = malloc(grid.Nx_tot * sizeof(real));
-    // memcpy(p0.r, pstate.r, grid.Nx_tot * sizeof(real));
-    // memcpy(p0.u, pstate.u, grid.Nx_tot * sizeof(real));
-    // memcpy(p0.p, pstate.p, grid.Nx_tot * sizeof(real));
+    // size_t itt = 0;
 
     while(*t < tmax)
     {
         step(tmax-*t);
-        itt++;
+        // itt++;
         // printf("%lu - %lf\n", itt, t);
     }
 
-    // for (size_t i = 0; i < grid.Nx; i++)
-    //     printf("%lu %lf %lf\n", i, p0.r[i+grid.Ng], pstate.r[i+grid.Ng]);
 }
 
 void compute_dt()
@@ -104,9 +86,10 @@ void compute_dt()
     for (size_t i = 0; i < grid.Nx_tot; i++)
     {
         real cs = SQRT(pstate.p[i] * grid.gamma / pstate.r[i]);
-        real new_dt = grid.dx / (cs + pstate.u[i]);
+        real new_dt = grid.CFL * grid.dx / (fabs(cs) + fabs(pstate.u[i]));
         dt = (new_dt < dt) ? new_dt : dt;
     }
+    // printf("%lf\n", dt);
     grid.dt = dt;
 }
 
@@ -116,6 +99,7 @@ void step(real dt_max)
     if(grid.dt > dt_max)
         grid.dt = dt_max;
     grid.t += grid.dt;
+
     compute_slopes();
     update_cells();
     fill_boundaries();
