@@ -102,6 +102,7 @@ void fill_boundaries();
 void compute_slopes();
 void reconstruct_interface_x(struct pcell *p, size_t i, real sign);
 void reconstruct_interface_y(struct pcell *p, size_t i, real sign);
+void reconstruct_muscl_hancock(struct pcell *p, size_t i);
 
 // tools
 void print_mat(real* mat, u32 n, u32 m);

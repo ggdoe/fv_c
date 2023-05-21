@@ -39,12 +39,12 @@ void init_sim(u32 nx, u32 ny)
     
     grid.N_tot = grid.Nx_tot * grid.Ny_tot;
 
-    malloc_struct(&pstate, grid.Nx_tot * grid.Ny_tot);
-    malloc_struct(&cstate, grid.Nx_tot * grid.Ny_tot);
-    malloc_struct(&fluxes_x, (grid.Nx_tot - 1) * (grid.Ny_tot - 1));
-    malloc_struct(&fluxes_y, (grid.Nx_tot - 1) * (grid.Ny_tot - 1));
-    malloc_struct(&x_slope, grid.Nx_tot * grid.Ny_tot);
-    malloc_struct(&y_slope, grid.Nx_tot * grid.Ny_tot);
+    malloc_struct(&pstate,   grid.N_tot);
+    malloc_struct(&cstate,   grid.N_tot);
+    malloc_struct(&fluxes_x, grid.N_tot);
+    malloc_struct(&fluxes_y, grid.N_tot);
+    malloc_struct(&x_slope,  grid.N_tot);
+    malloc_struct(&y_slope,  grid.N_tot);
 
     init_problem(&pstate);
 

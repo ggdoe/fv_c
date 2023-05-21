@@ -19,18 +19,18 @@ void init_SOD_2d(struct pstate *state)
     {
         for (size_t i = 0; i < Nx / 2; i++)
         {
-            state->r[j * Nx + i] = 1.0;
-            state->u[j * Nx + i] = 0.;
-            state->v[j * Nx + i] = 0.;
-            state->p[j * Nx + i] = 1.0;
+            state->r[i * Nx + j] = 1.0;
+            state->u[i * Nx + j] = 0.;
+            state->v[i * Nx + j] = 0.;
+            state->p[i * Nx + j] = 1.0;
         }
 
         for (size_t i = Nx / 2; i < Nx; i++)
         {
-            state->r[j * Nx + i] = 0.125;
-            state->u[j * Nx + i] = 0.;
-            state->v[j * Nx + i] = 0.;
-            state->p[j * Nx + i] = 0.1;
+            state->r[i * Nx + j] = 0.125;
+            state->u[i * Nx + j] = 0.;
+            state->v[i * Nx + j] = 0.;
+            state->p[i * Nx + j] = 0.1;
         }
     }
 }
@@ -46,11 +46,11 @@ void init_kelvin_helmholtz(struct pstate *state)
         for (size_t i = 0; i < Nx; i++)
         {
             real r,u;
-            if(j > Ny / 4 && j < 3 * Ny / 4){
-                r = 1.0; u = 0.5;
+            if(j <= (Ny+2) / 4 || j > 3 * (Ny-2) / 4){
+                r = 2.0; u = -0.5;
             }
             else{
-                r = 2.0; u = -0.5;
+                r = 1.0; u = 0.5;
             }
 
             state->r[j * Nx + i] = r;
@@ -60,6 +60,10 @@ void init_kelvin_helmholtz(struct pstate *state)
 
             state->u[j * Nx + i] += 0.01 * (2.*(real)rand()/(real)RAND_MAX - 1.0);
             state->v[j * Nx + i] += 0.01 * (2.*(real)rand()/(real)RAND_MAX - 1.0);
+            // if(i < Nx / 2)
+            //     state->u[j * Nx + i] += +0.01;
+            // else
+            //     state->v[j * Nx + i] += -0.01;
         }
 }
 

@@ -3,11 +3,11 @@
 SRC="./src/*.c ./src/sim/*.c"
 out_name="a.out"
 
-CFLAGS="-Wall -g"
-LFLAGS="-flto"
+CFLAGS="-Wall -O3"
+LFLAGS="-fopenmp -flto"
 LIB="-lm -lSDL2 -lx264"
 
-set -xe
+set -xe 
 gcc $CFLAGS $LFLAGS -o $out_name $SRC $LIB
 
 

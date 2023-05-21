@@ -17,14 +17,14 @@ void fill_boundaries_step_absorbing(real *q)
     u32 hix = Nx - grid.Ng;
     u32 hiy = Ny - grid.Ng;
 
-    for (u32 y = 0; y < Ny - 0; y++)
+    for (u32 y = 0; y < Ny; y++)
         for(u32 i=0; i < grid.Ng; i++)
         {
             q[Nx * y + i]       = q[Nx * y + lo];
             q[Nx * y + hix + i] = q[Nx * y + hix - 1];
         }
 
-    for (u32 x = 0; x < Nx - 0; x++)
+    for (u32 x = 0; x < Nx; x++)
         for(u32 j=0; j < grid.Ng; j++)
         {
             q[Nx * j + x]         = q[Nx * lo + x];
@@ -42,14 +42,14 @@ void  fill_boundaries_step_periodic(real *q)
     u32 hix = Nx - grid.Ng;
     u32 hiy = Ny - grid.Ng;
 
-    for (u32 y = 0; y < Ny - 0; y++)
+    for (u32 y = 0; y < Ny; y++)
         for(u32 i=0; i < grid.Ng; i++)
         {
             q[Nx * y + i]       = q[Nx * y + hix - lo + i];
             q[Nx * y + hix + i] = q[Nx * y + lo + i];
         }
 
-    for (u32 x = 0; x < Nx - 0; x++)
+    for (u32 x = 0; x < Nx; x++)
         for(u32 j=0; j < grid.Ng; j++)
         {
             q[Nx * j + x]         = q[Nx * (hiy - lo + j) + x];
@@ -67,14 +67,14 @@ void fill_boundaries_step_reflect(real *q, double sign)
     u32 hix = Nx - grid.Ng;
     u32 hiy = Ny - grid.Ng;
 
-    for (u32 y = 0; y < Ny - 0; y++)
+    for (u32 y = 0; y < Ny; y++)
         for(u32 i=0; i < grid.Ng; i++)
         {
             q[Nx * y + i]       = sign * q[Nx * y + lo + lo - i - 1];
             q[Nx * y + hix + i] = sign * q[Nx * y + hix - 1 - i];
         }
 
-    for (u32 x = 0; x < Nx - 0; x++)
+    for (u32 x = 0; x < Nx; x++)
         for(u32 j=0; j < grid.Ng; j++)
         {
             q[Nx * j + x]         = sign * q[Nx * (lo + lo - j - 1) + x];
@@ -86,13 +86,16 @@ void fill_boundaries()
 {
     fill_boundaries_step_periodic(cstate.r);
     fill_boundaries_step_periodic(cstate.ru);
+    fill_boundaries_step_periodic(cstate.rv);
     fill_boundaries_step_periodic(cstate.e);
 
     // fill_boundaries_step_absorbing(cstate.r);
     // fill_boundaries_step_absorbing(cstate.ru);
+    // fill_boundaries_step_absorbing(cstate.rv);
     // fill_boundaries_step_absorbing(cstate.e);
 
     // fill_boundaries_step_reflect(cstate.r ,  1.0);
     // fill_boundaries_step_reflect(cstate.ru, -1.0);
+    // fill_boundaries_step_reflect(cstate.rv, -1.0);
     // fill_boundaries_step_reflect(cstate.e ,  1.0);
 }

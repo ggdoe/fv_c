@@ -12,8 +12,9 @@ void print_mat(real* mat, u32 n, u32 m)
 {
     for (u32 j = 0; j < n; j++)
     {
+        printf("  ");
         for (u32 i = 0; i < m; i++)
-            printf("%6.3f ", mat[j * m + i]);
+            printf("%.3f ", mat[j * m + i]);
         printf("\n");
     }
 }
