@@ -4,8 +4,12 @@
 #include "sim/sim.h"
 #include "const.h"
 
-#define SDL_IMPL
-// #define x264_IMPL
+// #define SDL_IMPL
+#define x264_IMPL
+
+#ifdef x264_IMPL
+#include <signal.h>
+#endif
 
 extern struct pstate pstate;
 extern struct grid grid;
@@ -46,6 +50,13 @@ int main()
 // principal impl
 #else 
 
+#ifdef x264_IMPL
+void intHandler(int dummy) {
+    close_x264();
+    exit(0);
+}
+
+#endif
 
 int main(int argc, char ** argv)
 {   
@@ -55,6 +66,7 @@ int main(int argc, char ** argv)
         init_sdl();
     #else
         init_x264("out.mp4");
+        signal(SIGINT, intHandler);
     #endif
 
     pixels = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(uint32_t));
@@ -163,9 +175,26 @@ void fill_pixels(uint32_t *pixels)
         for (size_t i = 0; i < SCREEN_WIDTH; i++)
         {
             size_t id = (j+grid.Ng) * grid.Nx_tot + i + grid.Ng;
+            
+                // SOBEL
+            #if 0
+            int l = grid.Nx_tot;
+            double vx = -   q[id]     +   q[id+2]
+                        - 2*q[id+l]   + 2*q[id+l+2]
+                        -   q[id+2*l] +   q[id+2*l+2];
+            double vy = - q[id]     - 2*q[id+1]     - q[id+2]
+                        + q[id+2*l] - 2*q[id+1+2*l] - q[id+2+2*l];
+            double vv = sqrt(vx*vx+vy*vy);
+            double v = (vv-min)/(max-min);
+            uint8_t c = (v*256.);
+            pixels[i + j * SCREEN_WIDTH] = (c<<16) + (c<<8) + c;
+
+            #else
             double v = (q[id]-min)/(max-min);
             v = (v < 0.0) ? 0.0 : (v > 1.0) ? 1.0 : v;
+
             pixels[i + j * SCREEN_WIDTH] = cmap_nipy_spectral(1.-v);
+            #endif
         }
 }
 
