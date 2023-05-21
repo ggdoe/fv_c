@@ -16,6 +16,7 @@ typedef unsigned int u32;
 struct ccell{
     real r;
     real ru;
+    real rv;
     real e;
 };
 
@@ -23,6 +24,7 @@ struct ccell{
 struct pcell{
     real r;
     real u;
+    real v;
     real p;
 };
 
@@ -30,6 +32,7 @@ struct pcell{
 struct fcell{
     real r;
     real ru;
+    real rv;
     real e;
 };
 
@@ -37,6 +40,7 @@ struct fcell{
 struct pstate{
     real *r;
     real *u;
+    real *v;
     real *p;
 };
 
@@ -44,6 +48,7 @@ struct pstate{
 struct cstate{
     real *r;
     real *ru;
+    real *rv;
     real *e;
 };
 
@@ -51,18 +56,26 @@ struct cstate{
 struct fluxes{
     real *r;
     real *ru;
+    real *rv;
     real *e;
 };
 
 // grid params
 struct grid {
     u32 Ng;
-    u32 Nx;
+
+    u32 N_tot;
+
     u32 Nx_tot;
     real dx;
     real *x;
 
+    u32 Ny_tot;
+    real dy;
+    real *y;
+
     real xmin, xmax;
+    real ymin, ymax;
     
     real gamma;
     real CFL;
@@ -71,7 +84,7 @@ struct grid {
 };
 
 
-void init_sim(u32 Nx);
+void init_sim(u32 nx, u32 ny);
 void close_sim();
 
 void init_problem(struct pstate *state);
@@ -87,7 +100,8 @@ void run(real tmax);
 
 void fill_boundaries();
 void compute_slopes();
-void reconstruct_interface(struct pcell *p, size_t i, real sign);
+void reconstruct_interface_x(struct pcell *p, size_t i, real sign);
+void reconstruct_interface_y(struct pcell *p, size_t i, real sign);
 
 // tools
 void print_mat(real* mat, u32 n, u32 m);

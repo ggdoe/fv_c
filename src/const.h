@@ -4,8 +4,8 @@
 // #define SCREEN_WIDTH 640
 // #define SCREEN_HEIGHT 480
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH 256
+#define SCREEN_HEIGHT 256
 
 // #define SCREEN_WIDTH 2560
 // #define SCREEN_HEIGHT 1600

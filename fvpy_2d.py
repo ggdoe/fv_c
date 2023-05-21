@@ -277,9 +277,9 @@ class Sim:
 
         elif self.BC == 'periodic':
             self.U[:,     :lo , lo:hix+1] = self.U[:, hiy-Ng+1:hiy+1,      lo:hix+1]   # left
-            self.U[:,   hiy+1:, lo:hix+1] = self.U[:,     lo:lo+Ng,      lo:hix+1]   # right
+            self.U[:,   hiy+1:, lo:hix+1] = self.U[:,       lo:lo+Ng,      lo:hix+1]   # right
             self.U[:, lo:hiy+1,      :lo] = self.U[:,      lo:hiy+1, hix-Ng+1:hix+1]   # top
-            self.U[:, lo:hiy+1,   hix+1:] = self.U[:,      lo:hiy+1,     lo:lo+Ng]   # bottom
+            self.U[:, lo:hiy+1,   hix+1:] = self.U[:,        lo:hiy+1,     lo:lo+Ng]   # bottom
 
             self.U[:,     :lo,      :lo] = self.U[:, hiy-Ng+1:hiy+1, hix-Ng+1:hix+1]   # top-left
             self.U[:,   hiy+1:,     :lo] = self.U[:,     lo:lo+Ng, hix-Ng+1:hix+1]   # top-right
@@ -315,7 +315,7 @@ class Sim:
         '''
         cs = np.sqrt(self.Q[IP]*self.gamma / self.Q[IR])
 
-        new_dt = self.CFL * np.min(self.dx / (cs + np.fabs(self.Q[IU]) + np.fabs(self.Q[IV])))
+        # new_dt = self.CFL * np.min(self.dx / (cs + np.fabs(self.Q[IU]) + np.fabs(self.Q[IV])))
         min_x = np.min(self.dx / (cs + np.fabs(self.Q[IU])))
         min_y = np.min(self.dy / (cs + np.fabs(self.Q[IV])))
         new_dt = self.CFL * min(min_x, min_y)
@@ -325,11 +325,11 @@ class Sim:
 
 
         # Limiting the maximum value of dt to avoid too big variations
-        if new_dt/self.dt > self.max_dt_var:
-            new_dt = self.dt * self.max_dt_var
+        # if new_dt/self.dt > self.max_dt_var:
+        #     new_dt = self.dt * self.max_dt_var
         
         # Limiting dt if we go over the max sim time
-        new_dt = min(self.tend-self.t+1.0e-6, new_dt)
+        # new_dt = min(self.tend-self.t+1.0e-6, new_dt)
         self.dt = new_dt
 
     def compute_slopes(self):
@@ -406,6 +406,7 @@ class Sim:
             z = (self.gamma-1.0) / (2.0*self.gamma)
             ps = ((aL + aR - self.gamma*z*(QR[IU]-QL[IU])) / (aL/QL[IP]**z + aR/QR[IP]**z))**(1.0/z)
 
+            z = (self.gamma+1.0) / (2.0*self.gamma)
             qL = np.where(ps <= QL[IP], 1.0, np.sqrt(1.0 + z * (ps/QL[IP]-1.0)))
             qR = np.where(ps <= QR[IP], 1.0, np.sqrt(1.0 + z * (ps/QR[IP]-1.0)))
             
@@ -531,6 +532,7 @@ class Sim:
 
         '''Getting fluxes x'''
         F = self.solve_fluxes(xL, xR)
+        # print(F[IU])
         FL = F[:, :, :-1]
         FR = F[:, :,  1:]
 
@@ -539,6 +541,7 @@ class Sim:
         G[IU], G[IV] = G[IV], np.copy(G[IU])
         GL = G[:, :-1, :]
         GR = G[:,  1:, :]
+        # print(G[IU])
 
         # 3. Updating cells
         self.U[:, :, 1:-1] += self.dt / self.dx * (FL-FR)
@@ -559,6 +562,7 @@ class Sim:
 
         # 3. Computing dt using the CFL condition
         self.compute_dt()
+        print(self.dt)
 
         # 4. Calculating slopes
         self.compute_slopes()
@@ -595,7 +599,21 @@ class Sim:
             vmax = vmax + 0.20 * d
         else:
             vmin, vmax = vlim[0], vlim[1]
-        plt.imsave(f'out/tmp/{0:06}.png', self.Q0[field_to_plot], vmin=vmin, vmax=vmax, cmap=cmap)
+        # plt.imsave(f'out/tmp/{0:06}.png', self.Q0[field_to_plot], vmin=vmin, vmax=vmax, cmap=cmap)
+
+
+        np.set_printoptions(precision=3)
+        # print(self.Q0[IR])
+        self.step();self.conservative_to_primitive()
+        # print(self.dt)
+        # self.step();self.conservative_to_primitive()
+        # print(self.dt)
+        print(self.Q[IR])
+        # print(self.slopes_x[IR])
+        # plt.imshow(self.Qdom[IR])
+        # plt.imshow(self.Q0[IR])
+        plt.show()
+        return;
 
         while self.t < self.tend:
             self.step()
@@ -604,52 +622,54 @@ class Sim:
             if self.plot_all:
                 self.plot()
             
-            if self.t > last_save + freq_save :
-                last_save = self.t
-                self.conservative_to_primitive()
+            # if self.t > last_save + freq_save :
+            #     last_save = self.t
+            #     self.conservative_to_primitive()
                 
-                if self.put_obstacle:
-                    xmin, xmax, ymin, ymax = self.obstacle_xy
-                    self.Qdom[:, ymin:ymax+1, xmin:xmax+1] = 0.0
-                plt.imsave(f'out/tmp/{self.ite:06}.png', self.Qdom[field_to_plot], vmin=vmin, vmax=vmax, cmap=cmap)
+            #     if self.put_obstacle:
+            #         xmin, xmax, ymin, ymax = self.obstacle_xy
+            #         self.Qdom[:, ymin:ymax+1, xmin:xmax+1] = 0.0
+                # plt.imsave(f'out/tmp/{self.ite:06}.png', self.Qdom[field_to_plot], vmin=vmin, vmax=vmax, cmap=cmap)
                 # plt.ylim((0.1,1.025))
                 # plt.plot(self.ydom, self.Qdom[field_to_plot, self.Nx // 2, :])
                 # plt.savefig(f'out/tmp/{self.ite:06}.png')
                 # plt.close()
 
-            print(f'Iteration {self.ite}\tt={self.t:.5}\tdt={self.dt:.5}\t{"*" if last_save == self.t else ""}')
+            # print(f'Iteration {self.ite}\tt={self.t:.5}\tdt={self.dt:.5}\t{"*" if last_save == self.t else ""}')
             
             if self.ite == self.max_ite:
                 break
+        print(self.Q[IR])
 
 if __name__ == '__main__':
     import os
     
     """ param """
-    N = (128,128)
+    n = 8
+    N = (n,n)
     xy_max=(1.0,1.0)
     # problem='gaussian'
     # problem='kelvin-helmholtz'
-    problem='implosion'
-    # problem='SOD'
+    # problem='implosion'
+    problem='SOD'
     # problem='SOD-2d' 
     # BC='absorbing'
-    # BC='periodic' 
-    BC='reflect' 
+    BC='periodic' 
+    # BC='reflect' 
     # recons='pcm' 
-    recons='plm'
+    recons='pcm'
     limiter='minmod'
     # limiter='nolimiter'
     # limiter='monotonized_central'
-    CFL=0.4
+    CFL=0.3
     max_ite=0
-    tend=3.0
+    tend=0.2
     wave_estimate='toro2019'
     riemann = 'hllc'
     # wave_estimate='davis'
     # riemann = 'hll'
 
-    put_obstacle=True
+    put_obstacle=False
     # put_obstacle=False
     obstacle_xy=(32, 40, 32, 40)
     # obstacle_xy=(64, 80, 64, 80)
@@ -661,12 +681,12 @@ if __name__ == '__main__':
     # vlim = (0,0)
     cmap='nipy_spectral_r'
     freq_save = 1/60.
-    muscl=True
+    muscl=False
     
     sim = Sim(N=N, xy_max=xy_max, problem=problem, BC=BC, recons=recons, limiter=limiter, CFL=CFL, max_ite=max_ite, tend=tend, wave_estimate=wave_estimate, riemann=riemann, put_obstacle=put_obstacle, obstacle_xy=obstacle_xy, muscl=muscl)
-    os.system(f"rm out/tmp/*.png")
+    # os.system(f"rm out/tmp/*.png")
     sim.run(field_to_plot=field_to_plot, vlim=vlim, cmap=cmap, freq_save=freq_save)
-    os.system(f"ffmpeg -y -pattern_type glob -i 'out/tmp/*.png' -vf 'scale=640:-1' -c:v libx264 out/out.mp4")
+    # os.system(f"ffmpeg -y -pattern_type glob -i 'out/tmp/*.png' -vf 'scale=640:-1' -c:v libx264 out/out.mp4")
     
     # plt.plot(sim.xdom, sim.Qdom[IR, sim.Nx // 2, :])
     # plt.show()

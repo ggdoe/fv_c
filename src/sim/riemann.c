@@ -10,12 +10,14 @@ struct interface_val
 
 struct ccell cell_primitive_to_conservative(struct pcell *p)
 {
-    struct ccell c;
-    c.r  = p->r;
-    c.ru = p->r * p->u;
-    real Ek = 0.5 * p->r * (p->u * p->u);
-    c.e = Ek + p->p / (grid.gamma - 1.0);
+    real Ek = 0.5 * p->r * (p->u * p->u + p->v * p->v);
 
+    struct ccell c = {
+        .r  = p->r,
+        .ru = p->r * p->u,
+        .rv = p->r * p->v,
+        .e  = Ek + p->p / (grid.gamma - 1.0),
+    };
     return c;
 }
 
@@ -40,8 +42,10 @@ struct interface_val compute_wave_speed(struct pcell *pl, struct pcell *pr)
     real qL = (ps < pl->p) ? 1.0 : SQRT(1.0 + z * (ps / pl->p - 1.0));
     real qR = (ps < pr->p) ? 1.0 : SQRT(1.0 + z * (ps / pr->p - 1.0));
 
-    struct interface_val S = {.L = pl->u - aL * qL,
-                              .R = pr->u + aR * qR};
+    struct interface_val S = {
+        .L = pl->u - aL * qL,
+        .R = pr->u + aR * qR
+    };
     return S;
 }
 
@@ -50,15 +54,18 @@ struct fcell get_flux_star_shift(struct ccell *U, struct pcell *Q, real S, real 
     real factor = Q->r * (S - Q->u) / (S - Sstar);
 
     // Ustar
-    struct fcell shift = {.r  = factor * 1.0,
-                          .ru = factor * Sstar,
-                          .e  = factor * (U->e / U->r 
-                                          + (Sstar - Q->u) * (Sstar + Q->p / (Q->r * (S - Q->u))))
-                         };
+    struct fcell shift = {
+        .r  = factor * 1.0,
+        .ru = factor * Sstar,
+        .rv = factor * Q->v,
+        .e  = factor * (U->e / U->r 
+              + (Sstar - Q->u) * (Sstar + Q->p / (Q->r * (S - Q->u))))
+    };
     
     // shift flux
     shift.r  = S * (shift.r  - U->r);
     shift.ru = S * (shift.ru - U->ru);
+    shift.rv = S * (shift.rv - U->rv);
     shift.e  = S * (shift.e  - U->e);
 
     return shift;
@@ -71,8 +78,6 @@ struct fcell solve_fluxes(struct pcell *pl, struct pcell *pr)
 
     struct ccell Ul = cell_primitive_to_conservative(pl);
     struct ccell Ur = cell_primitive_to_conservative(pr);
-    struct fcell Fl = get_flux(pl);
-    struct fcell Fr = get_flux(pr);
 
     real Sstar = pr->p - pl->p 
                  + Ul.ru * (S.L - pl->u) - Ur.ru * (S.R - pr->u);
@@ -84,25 +89,33 @@ struct fcell solve_fluxes(struct pcell *pl, struct pcell *pr)
     struct fcell flux_out;
 
     if(0.0 <= S.L){
+        struct fcell Fl = get_flux(pl);
         flux_out.r  = Fl.r;
         flux_out.ru = Fl.ru;
+        flux_out.rv = Fl.rv;
         flux_out.e  = Fl.e;
     }
     else if(S.L <= 0.0 && 0.0 <= Sstar){
+        struct fcell Fl = get_flux(pl);
         struct fcell shift_Fl = get_flux_star_shift(&Ul, pl, S.L, Sstar);
         flux_out.r  = Fl.r  + shift_Fl.r;
         flux_out.ru = Fl.ru + shift_Fl.ru;
+        flux_out.rv = Fl.rv + shift_Fl.rv;
         flux_out.e  = Fl.e  + shift_Fl.e;
     }
     else if(Sstar <= 0.0 && 0.0 <= S.R){
+        struct fcell Fr = get_flux(pr);
         struct fcell shift_Fr = get_flux_star_shift(&Ur, pr, S.R, Sstar);
         flux_out.r  = Fr.r  + shift_Fr.r;
         flux_out.ru = Fr.ru + shift_Fr.ru;
+        flux_out.rv = Fr.rv + shift_Fr.rv;
         flux_out.e  = Fr.e  + shift_Fr.e;
     }
     else if(S.R <= 0.0){
+        struct fcell Fr = get_flux(pr);
         flux_out.r  = Fr.r;
         flux_out.ru = Fr.ru;
+        flux_out.rv = Fr.rv;
         flux_out.e  = Fr.e;
     }
     else{
@@ -110,22 +123,23 @@ struct fcell solve_fluxes(struct pcell *pl, struct pcell *pr)
         printf("S : %lf, %lf, %lf\n", S.L, Sstar, S.R);
         printf("r : %lf, %lf\n", pl->r, pr->r);
         printf("u : %lf, %lf\n", pl->u, pr->u);
+        printf("v : %lf, %lf\n", pl->v, pr->v);
         printf("p : %lf, %lf\n", pl->p, pr->p);
 
-        real gamma = grid.gamma;
+        // real gamma = grid.gamma;
 
-        real z  = (gamma - 1.0) / (2.0 * gamma);
+        // real z  = (gamma - 1.0) / (2.0 * gamma);
         
-        real aL = SQRT(pl->p * grid.gamma / pl->r);
-        real aR = SQRT(pr->p * grid.gamma / pr->r);
+        // real aL = SQRT(pl->p * grid.gamma / pl->r);
+        // real aR = SQRT(pr->p * grid.gamma / pr->r);
 
-        real numerator = (aL + aR - gamma * z * (pr->u - pl->u));
-        real denominator = aL / POW(pl->p, z) + aR / POW(pr->p, z);
-        real ps = POW(numerator / denominator, 1.0/z);
+        // real numerator = (aL + aR - gamma * z * (pr->u - pl->u));
+        // real denominator = aL / POW(pl->p, z) + aR / POW(pr->p, z);
+        // real ps = POW(numerator / denominator, 1.0/z);
 
-        printf("a : %lf, %lf\n", aL, aR);
-        printf("spe : %lf, %lf\n", aL + aR, gamma * z * (pr->u - pl->u));
-        printf("ps : %lf\n", ps);
+        // printf("a : %lf, %lf\n", aL, aR);
+        // printf("spe : %lf, %lf\n", aL + aR, gamma * z * (pr->u - pl->u));
+        // printf("ps : %lf\n", ps);
         assert(false);
     }
     
