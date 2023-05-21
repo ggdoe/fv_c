@@ -7,7 +7,7 @@ extern struct fluxes fluxes;
 
 extern struct pstate x_slope;
 
-void fill_boundaries_step_reflect(real *q, double sign); // delete
+void linspace(real* dest, real xmin, real xmax, u32 n);
 
 void init_sim(u32 Nx)
 {

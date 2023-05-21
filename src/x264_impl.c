@@ -24,6 +24,7 @@ void fill_x264_buf(uint32_t *pixels)
     // int chroma_size = luma_size / 4;
     // TODO : better setup size
 
+    // convert to YUV
     uint8_t *Y = pic.img.plane[0];
     uint8_t *U = pic.img.plane[1];
     uint8_t *V = pic.img.plane[2];
@@ -53,31 +54,6 @@ void fill_x264_buf(uint32_t *pixels)
     #undef G
     #undef B
 }
-
-
-// int main()
-// {
-//     uint32_t *pixels = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(uint32_t));
-//     memset(pixels, 0x00, SCREEN_HEIGHT * SCREEN_WIDTH * sizeof(uint32_t));
-
-//     for(int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++)
-//         pixels[i] = 0x000000FF;
-//     init_x264("out.mp4");
-
-//     for( ;; i_frame++ )
-//     {
-//         for(int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++)
-//             pixels[i] = rand();
-
-//             // TODO convert yuv
-//         // printf("%u %u %u\n", pic.img.plane[0][10], pic.img.plane[1][10], pic.img.plane[2][10]);
-//         if(update_x264(pixels))
-//             break;
-//     }
-
-//     close_x264();
-//     return 0;
-// }
 
 void init_x264(char * filename)
 {

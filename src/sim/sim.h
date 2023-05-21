@@ -12,43 +12,49 @@
 typedef double real;
 typedef unsigned int u32;
 
+// conservative cell
 struct ccell{
     real r;
     real ru;
     real e;
 };
 
+// primitive cell
 struct pcell{
     real r;
     real u;
     real p;
 };
 
+// flux cell
 struct fcell{
     real r;
     real ru;
     real e;
 };
 
-
+// primitive grid
 struct pstate{
     real *r;
     real *u;
     real *p;
 };
 
+// conservative grid
 struct cstate{
     real *r;
     real *ru;
     real *e;
 };
 
+// fluxes grid
 struct fluxes{
     real *r;
     real *ru;
     real *e;
 };
 
+// grid params
 struct grid {
     u32 Ng;
     u32 Nx;
@@ -59,7 +65,7 @@ struct grid {
     real xmin, xmax;
     
     real gamma;
-    real CFL; // TODO: move
+    real CFL;
     real dt;
     real t;
 };
@@ -81,9 +87,9 @@ void run(real tmax);
 
 void fill_boundaries();
 void compute_slopes();
+void reconstruct_interface(struct pcell *p, size_t i, real sign);
 
 // tools
-void linspace(real* dest, real xmin, real xmax, u32 n);
 void print_mat(real* mat, u32 n, u32 m);
 
 

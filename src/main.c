@@ -50,23 +50,22 @@ int main(int argc, char ** argv)
 
     while (!quit)
     {
-            #if 0
-            // if(grid.t >= 1.0)
-            // #ifdef SDL_IMPL
-            //     init_problem(&pstate);
-            // #else
-            //     break;
-            // #endif
+            #if 1
+                #ifdef SDL_IMPL
+                    // if(grid.t >= 0.2)
+                    //     init_problem(&pstate);
+                    //     SDL_Delay(1000);
+                #else
+                    if(grid.t >= 1.0)
+                        break;
+                #endif
             #endif
 
         real dt = 1/60.;
-        real t = grid.t;
-        while(grid.t < t + dt)
-            step(1.0);
+        real tmax = grid.t + dt;
+        while(grid.t < tmax)
+            step(tmax - grid.t);
         fill_pixels(pixels);
-
-        //  for(int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++)
-        //     pixels[i] = rand();
 
         #ifdef SDL_IMPL
             update_sdl(pixels);
