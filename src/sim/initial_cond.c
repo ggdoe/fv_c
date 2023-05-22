@@ -40,6 +40,8 @@ void init_kelvin_helmholtz(struct pstate *state)
 {
     size_t Nx = grid.Nx_tot;
     size_t Ny = grid.Ny_tot;
+
+    srand(time(NULL));
     
     // SOD-2d
     for (size_t j = 0; j < Ny; j++)

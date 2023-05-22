@@ -4,8 +4,8 @@
 #include "sim/sim.h"
 #include "const.h"
 
-// #define SDL_IMPL
-#define x264_IMPL
+#define SDL_IMPL
+// #define x264_IMPL
 
 #ifdef x264_IMPL
 #include <signal.h>
@@ -27,18 +27,19 @@ extern struct pstate y_slope;
 #if 0
 int main()
 {
-    int n = 64;
+    int n = 128;
     init_sim(n, n);
-    for(int i = 0;  i < 1000; i++){
-        step(1.0);printf("%.18lf\n", grid.dt);
-    }
+    // for(int i = 0;  i < 1000; i++){
+    //     step(1.0);printf("%.18lf\n", grid.dt);
+    // }
     // step(1.0);printf("%.18lf\n", grid.dt);
     // step(1.0);printf("%.18lf\n", grid.dt);
     // step(1.0);
     // printf("%.18lf\n", grid.dt);
-    // run(0.2);
+    run(1.0);
     // conservative_to_primitive(&pstate, &cstate);
-    print_mat(pstate.r, n+4, n+4);
+
+    // print_mat(pstate.r, n+4, n+4);
     // print_mat(x_slope.r, n+4, n+4);
     // step(1.0);
     // run(2.0);
@@ -94,16 +95,14 @@ int main(int argc, char ** argv)
                         break;
                 #endif
             #endif
-        printf("%u\n", (++itt)*5);
-        real dt = 1/120.;
+        // printf("%u\n", (++itt)*5);
+        real dt = 1/200.;
         real tmax = grid.t + dt;
-        // while(grid.t < tmax)
-        //     step(tmax - grid.t);
+        while(grid.t < tmax)
             step(1.0);
-            step(1.0);
-            step(1.0);
-            step(1.0);
-            step(1.0);
+
+        printf("%lf\n", grid.t);
+
         fill_pixels(pixels);
 
         #ifdef SDL_IMPL

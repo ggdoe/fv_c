@@ -14,7 +14,7 @@ void init_sdl()
     SDL_Init(SDL_INIT_VIDEO);
 
     window = SDL_CreateWindow("fv_c",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE);
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, 0);
     texture = SDL_CreateTexture(renderer,
             SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -24,7 +24,7 @@ void update_sdl(uint32_t *pixels)
 {
     SDL_UpdateTexture(texture, NULL, pixels, SCREEN_WIDTH * sizeof(uint32_t));
 
-    SDL_RenderClear(renderer);
+    // SDL_RenderClear(renderer);
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_RenderPresent(renderer);
 
@@ -36,7 +36,7 @@ void update_sdl(uint32_t *pixels)
                 break;
         }
     }
-    SDL_Delay(20);
+    // SDL_Delay(20);
 }
 
 void close_sdl()
