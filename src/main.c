@@ -11,6 +11,9 @@
 #include <signal.h>
 #endif
 
+
+#include "bench.h"
+
 extern struct pstate pstate;
 extern struct grid grid;
 uint32_t *pixels;
@@ -21,8 +24,8 @@ void fill_pixels(uint32_t *pixels);
 // test
 
 extern struct cstate cstate;
-extern struct pstate x_slope;
-extern struct pstate y_slope;
+// extern struct pstate x_slope;
+// extern struct pstate y_slope;
 
 #if 0
 int main()
@@ -82,7 +85,6 @@ int main(int argc, char ** argv)
             // }
             
     //
-    u32 itt = 0;
     while (!quit)
     {
             #if 1
@@ -96,12 +98,18 @@ int main(int argc, char ** argv)
                 #endif
             #endif
         // printf("%u\n", (++itt)*5);
-        real dt = 1/200.;
-        real tmax = grid.t + dt;
-        while(grid.t < tmax)
+        // real dt = 1/200.;
+        // real tmax = grid.t + dt;
+        // while(grid.t < tmax)
+        //     step(1.0);
+        const int nb_repeat = 10;
+        START_BENCH;
+        for(int i = 0; i < nb_repeat; i++)
             step(1.0);
+        LOG_BENCH;
+        PRINT_BENCH_PERIOD(BENCH_LOG_SIZE);
 
-        printf("%lf\n", grid.t);
+        // printf("%lf\n", grid.t);
 
         fill_pixels(pixels);
 

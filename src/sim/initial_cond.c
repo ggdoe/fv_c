@@ -5,8 +5,6 @@
 #endif
 
 extern struct grid grid;
-extern struct pstate pstate;
-extern struct cstate cstate;
 
 __attribute_maybe_unused__ 
 void init_SOD_2d(struct pstate *state)
@@ -36,7 +34,7 @@ void init_SOD_2d(struct pstate *state)
 }
 
 __attribute_maybe_unused__ 
-void init_kelvin_helmholtz(struct pstate *state)
+void init_kelvin_helmholtz(struct pstate *pstate)
 {
     size_t Nx = grid.Nx_tot;
     size_t Ny = grid.Ny_tot;
@@ -55,13 +53,13 @@ void init_kelvin_helmholtz(struct pstate *state)
                 r = 1.0; u = 0.5;
             }
 
-            state->r[j * Nx + i] = r;
-            state->u[j * Nx + i] = u;
-            state->v[j * Nx + i] = 0.0;
-            state->p[j * Nx + i] = 2.5;
+            pstate->r[j * Nx + i] = r;
+            pstate->u[j * Nx + i] = u;
+            pstate->v[j * Nx + i] = 0.0;
+            pstate->p[j * Nx + i] = 2.5;
 
-            state->u[j * Nx + i] += 0.01 * (2.*(real)rand()/(real)RAND_MAX - 1.0);
-            state->v[j * Nx + i] += 0.01 * (2.*(real)rand()/(real)RAND_MAX - 1.0);
+            pstate->u[j * Nx + i] += 0.01 * (2.*(real)rand()/(real)RAND_MAX - 1.0);
+            pstate->v[j * Nx + i] += 0.01 * (2.*(real)rand()/(real)RAND_MAX - 1.0);
             // if(i < Nx / 2)
             //     state->u[j * Nx + i] += +0.01;
             // else
@@ -69,14 +67,13 @@ void init_kelvin_helmholtz(struct pstate *state)
         }
 }
 
-void init_problem(struct pstate *state)
+void init_problem(struct pstate *pstate, struct cstate *cstate)
 {
     grid.t = 0;
 
     // init_SOD_2d(state);
-    init_kelvin_helmholtz(state);
-
-    fill_boundaries();
-    primitive_to_conservative(&cstate, &pstate);
+    init_kelvin_helmholtz(pstate);
+    primitive_to_conservative(pstate, cstate);
+    fill_boundaries(cstate);
 }
 

@@ -1,7 +1,6 @@
 #include "sim.h"
 
 extern struct grid grid;
-extern struct pstate pstate;
 struct pstate x_slope;
 struct pstate y_slope;
 
@@ -10,20 +9,20 @@ real minmod(real a, real b)
     return (a * b < 0.0) ? 0.0 : (fabs(a) < fabs(b)) ? a : b;
 }
 
-void compute_slopes()
+void compute_slopes(struct pstate *pstate)
 {
     for (size_t j = 0; j < grid.Ny_tot; j++)
         for (size_t i = 1; i < grid.Nx_tot - 1; i++)
         {
             size_t id = j * grid.Nx_tot + i;
-            x_slope.r[id] = minmod(pstate.r[id  ] - pstate.r[id-1], 
-                                   pstate.r[id+1] - pstate.r[id  ]);
-            x_slope.u[id] = minmod(pstate.u[id  ] - pstate.u[id-1], 
-                                   pstate.u[id+1] - pstate.u[id  ]);
-            x_slope.v[id] = minmod(pstate.v[id  ] - pstate.v[id-1], 
-                                   pstate.v[id+1] - pstate.v[id  ]);
-            x_slope.p[id] = minmod(pstate.p[id  ] - pstate.p[id-1], 
-                                   pstate.p[id+1] - pstate.p[id  ]);
+            x_slope.r[id] = minmod(pstate->r[id  ] - pstate->r[id-1], 
+                                   pstate->r[id+1] - pstate->r[id  ]);
+            x_slope.u[id] = minmod(pstate->u[id  ] - pstate->u[id-1], 
+                                   pstate->u[id+1] - pstate->u[id  ]);
+            x_slope.v[id] = minmod(pstate->v[id  ] - pstate->v[id-1], 
+                                   pstate->v[id+1] - pstate->v[id  ]);
+            x_slope.p[id] = minmod(pstate->p[id  ] - pstate->p[id-1], 
+                                   pstate->p[id+1] - pstate->p[id  ]);
         }
 
     for (size_t j = 1; j < grid.Ny_tot - 1; j++)
@@ -31,14 +30,14 @@ void compute_slopes()
         {
             size_t id = j * grid.Nx_tot + i;
             size_t l = grid.Nx_tot; // access top/bot cell
-            y_slope.r[id] = minmod(pstate.r[id  ] - pstate.r[id-l], 
-                                   pstate.r[id+l] - pstate.r[id  ]);
-            y_slope.u[id] = minmod(pstate.u[id  ] - pstate.u[id-l], 
-                                   pstate.u[id+l] - pstate.u[id  ]);
-            y_slope.v[id] = minmod(pstate.v[id  ] - pstate.v[id-l], 
-                                   pstate.v[id+l] - pstate.v[id  ]);
-            y_slope.p[id] = minmod(pstate.p[id  ] - pstate.p[id-l], 
-                                   pstate.p[id+l] - pstate.p[id  ]);
+            y_slope.r[id] = minmod(pstate->r[id  ] - pstate->r[id-l], 
+                                   pstate->r[id+l] - pstate->r[id  ]);
+            y_slope.u[id] = minmod(pstate->u[id  ] - pstate->u[id-l], 
+                                   pstate->u[id+l] - pstate->u[id  ]);
+            y_slope.v[id] = minmod(pstate->v[id  ] - pstate->v[id-l], 
+                                   pstate->v[id+l] - pstate->v[id  ]);
+            y_slope.p[id] = minmod(pstate->p[id  ] - pstate->p[id-l], 
+                                   pstate->p[id+l] - pstate->p[id  ]);
         }
 
     // x_slope.r[0]               = x_slope.r[1]; 

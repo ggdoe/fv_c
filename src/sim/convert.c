@@ -1,7 +1,6 @@
 #include "sim.h"
 
 extern struct grid grid;
-extern struct pstate pstate;
 
 struct pcell get_cell(struct pstate *pstate, size_t index)
 {
@@ -13,7 +12,7 @@ struct pcell get_cell(struct pstate *pstate, size_t index)
 }
 
 
-void primitive_to_conservative(struct cstate *c, struct pstate *p)
+void primitive_to_conservative(struct pstate *p, struct cstate *c)
 {
     for (size_t i = 0; i < grid.N_tot; i++)
     {
@@ -26,7 +25,7 @@ void primitive_to_conservative(struct cstate *c, struct pstate *p)
     }
 }
 
-void conservative_to_primitive(struct pstate *p, struct cstate *c)
+void conservative_to_primitive(struct cstate *c, struct pstate *p)
 {
     for (size_t i = 0; i < grid.N_tot; i++)
     {
@@ -41,7 +40,7 @@ void conservative_to_primitive(struct pstate *p, struct cstate *c)
             p->r[i] = 1.0e-5;
         if(p->p[i] < 0.0)
             p->p[i] = 1.0e-5;
-        // TODO : call 'primitive_to_conservative' maybe
+        // call 'primitive_to_conservative' maybe
     }
 }
 

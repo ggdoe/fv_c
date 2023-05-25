@@ -5,9 +5,10 @@ extern struct pstate pstate;
 extern struct cstate cstate;
 extern struct fluxes fluxes_x;
 extern struct fluxes fluxes_y;
-
 extern struct pstate x_slope;
 extern struct pstate y_slope;
+
+#define MALLOC(s) aligned_alloc(64, s)
 
 void linspace(real* dest, real xmin, real xmax, u32 n);
 void malloc_struct(void *in, size_t n);
@@ -16,7 +17,7 @@ void init_sim(u32 nx, u32 ny)
 {
     u32 Ng = 2;
     grid.Ng = Ng;
-    grid.CFL = 0.3;
+    grid.CFL = 0.5;
     grid.gamma = 1.4;
 
     // x discretization
@@ -25,7 +26,7 @@ void init_sim(u32 nx, u32 ny)
     real xmax = 1.; grid.xmax = xmax;
     real dx = (xmax - xmin) / nx;
     grid.dx = dx;
-    grid.x = malloc(grid.Nx_tot * sizeof(real));
+    grid.x = MALLOC(grid.Nx_tot * sizeof(real));
     linspace(grid.x, xmin + (0.5 - (real)Ng) * dx, xmax + ((real)Ng - 0.5) * dx, grid.Nx_tot);
 
     // y discretization
@@ -34,7 +35,7 @@ void init_sim(u32 nx, u32 ny)
     real ymax = 1.; grid.ymax = ymax;
     real dy = (ymax - ymin) / ny;
     grid.dy = dy;
-    grid.y = malloc(grid.Ny_tot * sizeof(real));
+    grid.y = MALLOC(grid.Ny_tot * sizeof(real));
     linspace(grid.y, ymin + (0.5 - (real)Ng) * dy, ymax + ((real)Ng - 0.5) * dy, grid.Ny_tot);
     
     grid.N_tot = grid.Nx_tot * grid.Ny_tot;
@@ -46,7 +47,7 @@ void init_sim(u32 nx, u32 ny)
     malloc_struct(&x_slope,  grid.N_tot);
     malloc_struct(&y_slope,  grid.N_tot);
 
-    init_problem(&pstate);
+    init_problem(&pstate, &cstate);
 
     // memset(fluxes.r, 0, (grid.Nx_tot - 1) * sizeof(real));
     // memset(fluxes.ru, 0, (grid.Nx_tot - 1) * sizeof(real));
@@ -56,10 +57,10 @@ void init_sim(u32 nx, u32 ny)
 void malloc_struct(void *in, size_t n)
 {
     struct pstate *q = in;
-    q->r = malloc(n * sizeof(real));
-    q->u = malloc(n * sizeof(real));
-    q->v = malloc(n * sizeof(real));
-    q->p = malloc(n * sizeof(real));
+    q->r = MALLOC(n * sizeof(real));
+    q->u = MALLOC(n * sizeof(real));
+    q->v = MALLOC(n * sizeof(real));
+    q->p = MALLOC(n * sizeof(real));
      
     // TODO suppr
     // memset(q->r, 0, n * sizeof(real));

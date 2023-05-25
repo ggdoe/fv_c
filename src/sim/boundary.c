@@ -5,7 +5,6 @@
 #endif
 
 extern struct grid grid;
-extern struct cstate cstate;
 
 __attribute_maybe_unused__ 
 void fill_boundaries_step_absorbing(real *q)
@@ -82,20 +81,20 @@ void fill_boundaries_step_reflect(real *q, double sign)
         }
 }
 
-void fill_boundaries()
+void fill_boundaries(struct cstate *cstate)
 {
-    fill_boundaries_step_periodic(cstate.r);
-    fill_boundaries_step_periodic(cstate.ru);
-    fill_boundaries_step_periodic(cstate.rv);
-    fill_boundaries_step_periodic(cstate.e);
+    fill_boundaries_step_periodic(cstate->r);
+    fill_boundaries_step_periodic(cstate->ru);
+    fill_boundaries_step_periodic(cstate->rv);
+    fill_boundaries_step_periodic(cstate->e);
 
-    // fill_boundaries_step_absorbing(cstate.r);
-    // fill_boundaries_step_absorbing(cstate.ru);
-    // fill_boundaries_step_absorbing(cstate.rv);
-    // fill_boundaries_step_absorbing(cstate.e);
+    // fill_boundaries_step_absorbing(cstate->r);
+    // fill_boundaries_step_absorbing(cstate->ru);
+    // fill_boundaries_step_absorbing(cstate->rv);
+    // fill_boundaries_step_absorbing(cstate->e);
 
-    // fill_boundaries_step_reflect(cstate.r ,  1.0);
-    // fill_boundaries_step_reflect(cstate.ru, -1.0);
-    // fill_boundaries_step_reflect(cstate.rv, -1.0);
-    // fill_boundaries_step_reflect(cstate.e ,  1.0);
+    // fill_boundaries_step_reflect(cstate->r ,  1.0);
+    // fill_boundaries_step_reflect(cstate->ru, -1.0);
+    // fill_boundaries_step_reflect(cstate->rv, -1.0);
+    // fill_boundaries_step_reflect(cstate->e ,  1.0);
 }
