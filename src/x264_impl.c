@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <signal.h>
 
 #include <x264.h>
 #include "const.h"
@@ -39,12 +40,12 @@ void fill_x264_buf(uint32_t *pixels)
     for(int i = 0; i < SCREEN_WIDTH; i+=2)
         for(int j = 0; j < SCREEN_HEIGHT; j+=2){
             int w = SCREEN_WIDTH;
-            uint8_t r = (R(j*w+i) + R(j*w+i+1) + R((j+1)*w+i) + R((j+1)*w+i+1)) / 4;
-            uint8_t g = (G(j*w+i) + G(j*w+i+1) + G((j+1)*w+i) + G((j+1)*w+i+1)) / 4;
-            uint8_t b = (B(j*w+i) + B(j*w+i+1) + B((j+1)*w+i) + B((j+1)*w+i+1)) / 4;
-            // uint8_t r = R(j*w+i);
-            // uint8_t g = G(j*w+i);
-            // uint8_t b = B(j*w+i);
+            // uint8_t r = (R(j*w+i) + R(j*w+i+1) + R((j+1)*w+i) + R((j+1)*w+i+1)) / 4;
+            // uint8_t g = (G(j*w+i) + G(j*w+i+1) + G((j+1)*w+i) + G((j+1)*w+i+1)) / 4;
+            // uint8_t b = (B(j*w+i) + B(j*w+i+1) + B((j+1)*w+i) + B((j+1)*w+i+1)) / 4;
+            uint8_t r = R(j*w+i);
+            uint8_t g = G(j*w+i);
+            uint8_t b = B(j*w+i);
             
             U[i/2 + j*w/4] = ((-38*r -74*g +112*b + 128)>>8)+128;
             V[i/2 + j*w/4] = ((112*r-94*g-18*b+128)>>8)+128;
@@ -53,6 +54,11 @@ void fill_x264_buf(uint32_t *pixels)
     #undef R
     #undef G
     #undef B
+}
+
+void intHandler(int dummy) {
+    close_x264();
+    exit(0);
 }
 
 void init_x264(char * filename)
@@ -83,6 +89,8 @@ void init_x264(char * filename)
 
     x264_picture_alloc( &pic, param.i_csp, param.i_width, param.i_height );
     encoder = x264_encoder_open(&param);
+
+    signal(SIGINT, intHandler);
 }
 
 int update_x264(uint32_t *pixels)

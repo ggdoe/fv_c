@@ -7,11 +7,9 @@
 #define SDL_IMPL
 // #define x264_IMPL
 
-#ifdef x264_IMPL
-#include <signal.h>
-#endif
-
-
+// #define BENCH_NO_AUTO_INIT
+#define BENCH_LOG_SIZE 128
+#define BENCH_PRECISION ms
 #include "bench.h"
 
 extern struct pstate pstate;
@@ -51,14 +49,30 @@ int main()
     return 0;
 }
 
+// BENCH
+#elif 0
+
+int main()
+{
+        const int nb_repeat = BENCH_LOG_SIZE;
+        int n = 128;
+        for(int i = 0; i < nb_repeat; i++){
+            init_sim(n, n);
+            BENCH_START;
+            run(1.0);
+            BENCH_LOG;
+            printf("%u : %.4lf ms\n", i, BENCH_LAST);
+            reset_sim();
+        }
+        BENCH_PRINT
+
+    return 0;
+}
+
 // principal impl
-#else 
+#else
 
 #ifdef x264_IMPL
-void intHandler(int dummy) {
-    close_x264();
-    exit(0);
-}
 
 #endif
 
@@ -70,7 +84,6 @@ int main(int argc, char ** argv)
         init_sdl();
     #else
         init_x264("out.mp4");
-        signal(SIGINT, intHandler);
     #endif
 
     pixels = malloc(SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(uint32_t));
@@ -103,11 +116,11 @@ int main(int argc, char ** argv)
         // while(grid.t < tmax)
         //     step(1.0);
         const int nb_repeat = 10;
-        START_BENCH;
+        BENCH_START;
         for(int i = 0; i < nb_repeat; i++)
             step(1.0);
-        LOG_BENCH;
-        PRINT_BENCH_PERIOD(BENCH_LOG_SIZE);
+        BENCH_LOG;
+        BENCH_PRINT_PERIOD(BENCH_LOG_SIZE);
 
         // printf("%lf\n", grid.t);
 

@@ -87,6 +87,7 @@ struct grid {
 
 
 void init_sim(u32 nx, u32 ny);
+void reset_sim();
 void close_sim();
 
 void init_problem(struct pstate *pstate, struct cstate *cstate);

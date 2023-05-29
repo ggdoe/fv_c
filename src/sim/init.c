@@ -47,11 +47,19 @@ void init_sim(u32 nx, u32 ny)
     malloc_struct(&x_slope,  grid.N_tot);
     malloc_struct(&y_slope,  grid.N_tot);
 
-    init_problem(&pstate, &cstate);
+    // grid.t = 0;
+    // init_problem(&pstate, &cstate);
+    reset_sim();
 
     // memset(fluxes.r, 0, (grid.Nx_tot - 1) * sizeof(real));
     // memset(fluxes.ru, 0, (grid.Nx_tot - 1) * sizeof(real));
     // memset(fluxes.e, 0, (grid.Nx_tot - 1) * sizeof(real));
+}
+
+void reset_sim()
+{
+    grid.t = 0;
+    init_problem(&pstate, &cstate);
 }
 
 void malloc_struct(void *in, size_t n)
