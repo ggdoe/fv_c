@@ -189,7 +189,7 @@ u32 cmap_nipy_spectral(double v)
 void fill_pixels(uint32_t *pixels)
 {
     real *q = pstate.r;
-    double min = 0.8, max = 2.2;
+    double min = 0.08, max = 6.5;
 
     for(size_t j = 0; j < SCREEN_HEIGHT; j++)
         for (size_t i = 0; i < SCREEN_WIDTH; i++)
