@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "sim/sim.h"
+#include "cmap.h"
 #include "const.h"
 
 #define SDL_IMPL
@@ -16,8 +17,6 @@ extern struct pstate pstate;
 extern struct grid grid;
 uint32_t *pixels;
 bool quit;
-
-void fill_pixels(uint32_t *pixels);
 
 // test
 
@@ -54,17 +53,28 @@ int main()
 
 int main()
 {
-        const int nb_repeat = BENCH_LOG_SIZE;
-        int n = 128;
-        for(int i = 0; i < nb_repeat; i++){
-            init_sim(n, n);
-            BENCH_START;
-            run(1.0);
-            BENCH_LOG;
-            printf("%u : %.4lf ms\n", i, BENCH_LAST);
-            reset_sim();
-        }
-        BENCH_PRINT
+    #define BENCH_LOG_SIZE 10
+    BENCH_INIT
+    const int nb_repeat = BENCH_LOG_SIZE;
+    
+    int n = 128;
+    for(int i = 0; i < nb_repeat; i++){
+        init_sim(n, n);
+        BENCH_START
+        run(1.0);
+        BENCH_LOG
+        printf("%u : %.4lf ms\n", i, BENCH_LAST);
+        reset_sim();
+    }
+    BENCH_PRINT
+
+    // AOS - no omp - 128x128 - 1.0sec
+    /**
+       0 : 1988.7326 ms
+       1 : 1964.5434 ms
+       2 : 1949.5147 ms
+       3 : 1950.6762 ms
+    */
 
     return 0;
 }
@@ -124,7 +134,7 @@ int main(int argc, char ** argv)
 
         // printf("%lf\n", grid.t);
 
-        fill_pixels(pixels);
+        fill_pixels(pixels, pstate.r);
 
         #ifdef SDL_IMPL
             update_sdl(pixels);
@@ -147,78 +157,6 @@ int main(int argc, char ** argv)
 }
 
 #endif
-
-u32 cmap_nipy_spectral(double v)
-{
-    static float data[22][3] = 
-            {
-                {  0.,   0.,   0.},
-                {119.,   0., 136.},
-                {136.,   0., 153.},
-                {  0.,   0., 170.},
-                {  0.,   0., 221.},
-                {  0., 119., 221.},
-                {  0., 153., 221.},
-                {  0., 170., 170.},
-                {  0., 170., 136.},
-                {  0., 153.,   0.},
-                {  0., 187.,   0.},
-                {  0., 221.,   0.},
-                {  0., 255.,   0.},
-                {187., 255.,   0.},
-                {238., 238.,   0.},
-                {255., 204.,   0.},
-                {255., 153.,   0.},
-                {255.,   0.,   0.},
-                {221.,   0.,   0.},
-                {204.,   0.,   0.},
-                {204., 204., 204.}
-            };
-
-    double index = v * 20.;
-    double frac = index - floor(index);
-    size_t id = index;
-
-    u32 r = ((1-frac) * data[id][0] + frac * data[id+1][0]);
-    u32 g = ((1-frac) * data[id][1] + frac * data[id+1][1]);
-    u32 b = ((1-frac) * data[id][2] + frac * data[id+1][2]);
-
-    return (r<<16) + (g<<8) + b;
-}
-
-void fill_pixels(uint32_t *pixels)
-{
-    real *q = pstate.r;
-    double min = 0.08, max = 6.5;
-
-    for(size_t j = 0; j < SCREEN_HEIGHT; j++)
-        for (size_t i = 0; i < SCREEN_WIDTH; i++)
-        {
-            size_t id = (j+grid.Ng) * grid.Nx_tot + i + grid.Ng;
-            
-                // SOBEL
-            #if 0
-            int l = grid.Nx_tot;
-            double vx = -   q[id]     +   q[id+2]
-                        - 2*q[id+l]   + 2*q[id+l+2]
-                        -   q[id+2*l] +   q[id+2*l+2];
-            double vy = - q[id]     - 2*q[id+1]     - q[id+2]
-                        + q[id+2*l] - 2*q[id+1+2*l] - q[id+2+2*l];
-            double vv = sqrt(vx*vx+vy*vy);
-            double v = (vv-min)/(max-min);
-            uint8_t c = (v*256.);
-            pixels[i + j * SCREEN_WIDTH] = (c<<16) + (c<<8) + c;
-
-            #else
-            double v = (q[id]-min)/(max-min);
-            v = (v < 0.0) ? 0.0 : (v > 1.0) ? 1.0 : v;
-
-            pixels[i + j * SCREEN_WIDTH] = cmap_nipy_spectral(1.-v);
-            #endif
-        }
-}
-
-
 
 
 // -----> old 1d //////

@@ -8,7 +8,8 @@ extern struct fluxes fluxes_y;
 extern struct pstate x_slope;
 extern struct pstate y_slope;
 
-#define MALLOC(s) aligned_alloc(64, s)
+// #define MALLOC(s) aligned_alloc(64, s)
+#define MALLOC(s) malloc(s) // mingw
 
 void linspace(real* dest, real xmin, real xmax, u32 n);
 void malloc_struct(void *in, size_t n);

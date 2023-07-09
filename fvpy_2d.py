@@ -111,11 +111,11 @@ class Sim:
         '''
         if self.problem == 'SOD':
             side = len(self.x) // 2
-            self.Q[IR, :, :side] = 1.0
-            self.Q[IR, :, side:] = 0.125
+            self.Q[IR, :side, :] = 1.0
+            self.Q[IR, side:, :] = 0.125
 
-            self.Q[IP, :, :side] = 1.0
-            self.Q[IP, :, side:] = 0.1
+            self.Q[IP, :side, :] = 1.0
+            self.Q[IP, side:, :] = 0.1
 
             # shape = np.shape(self.Q[IU, :, :])
             # self.Q[IU, :, :] = 0.5 * (2*np.random.rand(*shape) - 1)
@@ -160,10 +160,14 @@ class Sim:
             self.Q[IV,  :, :] = 0.0
             self.Q[IP,  :, :] = 2.5
 
-            np.random.seed(1)
-            shape = np.shape(self.Q[IU, :, :])
-            self.Q[IU, :, :] += 0.01 * (np.random.rand(*shape) - 0.5)
-            self.Q[IV, :, :] += 0.01 * (np.random.rand(*shape) - 0.5)
+            # np.random.seed(1)
+            # shape = np.shape(self.Q[IU, :, :])
+            # self.Q[IU, :, :] += 0.01 * (np.random.rand(*shape) - 0.5)
+            # self.Q[IV, :, :] += 0.01 * (np.random.rand(*shape) - 0.5)
+            
+            lx = self.y < 0.5
+            self.Q[IU, :,  lx] += +0.01
+            self.Q[IV, :, ~lx] += -0.01
 
         elif self.problem == 'gaussian':
             r2 = np.matrix((self.x - 0.5)**2)
@@ -551,14 +555,10 @@ class Sim:
         '''
         One step of the Godunov Solver
         '''
-        # 1. Filling boundaries
-        self.fill_boundaries()
 
         if self.put_obstacle:
             self.obstacle(*self.obstacle_xy)
 
-        # 2. Convert to primitives
-        self.conservative_to_primitive()
 
         # 3. Computing dt using the CFL condition
         self.compute_dt()
@@ -569,6 +569,10 @@ class Sim:
 
         # 5. Solving riemann problems and updating cells
         self.update_cells()
+        # 1. Filling boundaries
+        self.fill_boundaries()
+        # 2. Convert to primitives
+        self.conservative_to_primitive()
 
     def plot(self):
         '''
@@ -602,10 +606,14 @@ class Sim:
         # plt.imsave(f'out/tmp/{0:06}.png', self.Q0[field_to_plot], vmin=vmin, vmax=vmax, cmap=cmap)
 
 
-        np.set_printoptions(precision=3)
+        np.set_printoptions(precision=3, linewidth=20000, threshold=20000, formatter={'float': '{:0.3f}'.format})
         # print(self.Q0[IR])
-        self.step();self.conservative_to_primitive()
-        # print(self.dt)
+        for i in range(1000):
+            self.ite += 1
+            self.step();
+            plt.imsave(f'out/{self.ite:06}.png', self.Q[IR], vmin=0.8, vmax=2.2, cmap=cmap)
+        # self.step();
+        # self.step();
         # self.step();self.conservative_to_primitive()
         # print(self.dt)
         print(self.Q[IR])
@@ -645,19 +653,19 @@ if __name__ == '__main__':
     import os
     
     """ param """
-    n = 8
+    n = 64
     N = (n,n)
     xy_max=(1.0,1.0)
     # problem='gaussian'
-    # problem='kelvin-helmholtz'
+    problem='kelvin-helmholtz'
     # problem='implosion'
-    problem='SOD'
+    # problem='SOD'
     # problem='SOD-2d' 
     # BC='absorbing'
     BC='periodic' 
     # BC='reflect' 
     # recons='pcm' 
-    recons='pcm'
+    recons='plm'
     limiter='minmod'
     # limiter='nolimiter'
     # limiter='monotonized_central'

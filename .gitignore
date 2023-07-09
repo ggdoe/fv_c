@@ -1,3 +1,15 @@
 .vscode/
 a.out
 
+1d_sdl.exe
+1d_sdl.out
+1d_x264.out
+SDL2.dll
+a.exe
+fvpy_1d.py
+libgcc_s_seh-1.dll
+libgomp-1.dll
+libwinpthread-1.dll
+out.mp4
+wbuild.sh
+

@@ -4,7 +4,8 @@ SRC="./src/*.c ./src/sim/*.c"
 out_name="a.out"
 
 CFLAGS="-Wall -O3"
-LFLAGS="-fopenmp -flto"
+LFLAGS="-flto -fopenmp"
+# LFLAGS="-flto"
 LIB="-lm -lSDL2 -lx264"
 
 set -xe 

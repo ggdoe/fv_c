@@ -55,10 +55,10 @@
                     static double __bench_times__[BENCH_LOG_SIZE];         \
                     static struct timespec __bench_start__, __bench_end__;
 
-#define BENCH_START clock_gettime(CLOCK_MONOTONIC_RAW, &__bench_start__);
+#define BENCH_START clock_gettime(CLOCK_MONOTONIC, &__bench_start__);
 
 #define BENCH_LOG   {                                                                                      \
-                        clock_gettime(CLOCK_MONOTONIC_RAW, &__bench_end__);                                \
+                        clock_gettime(CLOCK_MONOTONIC, &__bench_end__);                                \
                         double __sec__ = (double)(__bench_end__.tv_sec  - __bench_start__.tv_sec)          \
                                        + (double)(__bench_end__.tv_nsec - __bench_start__.tv_nsec) * 1e-9; \
                         __bench_times__[__bench_itetation__ % BENCH_LOG_SIZE] = __sec__ * __BENCH_PREC__;  \
